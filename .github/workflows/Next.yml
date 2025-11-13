@@ -9,7 +9,6 @@ jobs:
     timeout-minutes: 3600
 
     steps:
-
       - name: Configure Core RDP Settings
         run: |
           # Enable Remote Desktop and disable Network Level Authentication (if needed)
@@ -76,9 +75,11 @@ jobs:
           Remove-Item $installerPath -Force
 
       - name: Establish Tailscale Connection
+        env:
+          TAILSCALE_AUTH_KEY: "tskey-auth-kXQ8S5m1HT11CNTRL-6iUAXtkeowW5xX8tjMmTxWbPoLvq2cR6"  # Add the key here directly
         run: |
           # Bring up Tailscale with the provided auth key and set a unique hostname
-          & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=gh-runner-$env:GITHUB_RUN_ID
+          & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --hostname=gh-runner-$env:GITHUB_RUN_ID
 
           # Wait for Tailscale to assign an IP
           $tsIP = $null
@@ -96,7 +97,7 @@ jobs:
           }
 
           echo "TAILSCALE_IP=$tsIP" >> $env:GITHUB_ENV
-
+     
       - name: Verify RDP Accessibility
         run: |
           Write-Host "Tailscale IP: $env:TAILSCALE_IP"
